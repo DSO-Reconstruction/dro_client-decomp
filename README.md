@@ -1,1 +1,1 @@
-# dro_client-decomp
+Script for Ghidra naming decompiled funcions based on arguments they pass to assert or error functions.
