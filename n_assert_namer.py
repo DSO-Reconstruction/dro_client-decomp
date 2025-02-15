@@ -31,10 +31,19 @@ def ensureTypesDefined(sigStr):
                 print("Defined placeholder type for: " + typeName)
             except Exception as e:
                 print("Failed to define placeholder for type {}: {}".format(typeName, e))
-                
+
+def replace_in_brackets(text, old="::", new ="_" ):
+    match = re.search(r"<(.*)>", text)
+    if match:
+        substring_to_modify = match.group(1)
+        modified_substring = substring_to_modify.replace(old, new)
+        result = text[:match.start(1)] + modified_substring + text[match.end(1):]
+        return result
+    else:
+        return text               
                 
 def getSignatureFromNAssert(decompiledText):
-    reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^"]+\s([\w:]*(?:<[\s\w:,<>]*>)?[\w:]*(?:\s\[\])?)\s*\([^"]*\))(?:\s\w*)?"' # function name
+    reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^":]+\s([\w:]*(?:<[\s\w:,<>]*>)?[\w:]*(?:\s\[\])?)\s*\([^"]*\))(?:\s\w*)?"' # function name
     #reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^"]+\([^"]*\))"' # full signature
 
     pattern = re.compile(reguex, re.DOTALL)
@@ -44,7 +53,13 @@ def getSignatureFromNAssert(decompiledText):
         #matches = [extractQualifiedName(mat) for mat in m] # for full signature
         if len(set([n[1] for n in m])) == 1 and str(m[0][1]).split('::')[-1] != 'Instance':
                 ensureTypesDefined(m[0][0])
-                sig = m[0][1].replace("operator ", "operator").replace('<', '_').replace('>', '_').replace(' ', '_').replace(',', '_')
+                sig = m[0][1]
+                sig = replace_in_brackets(sig)
+                sig = sig.replace("class ", "")
+                sig = sig.replace(" ", "")
+                sig = sig.replace("<", "6")
+                sig = sig.replace(">", "9")
+                sig = sig.replace(',', '1')
                 return sig
         for n in m:
             ensureTypesDefined(n[0])            
