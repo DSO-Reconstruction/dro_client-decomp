@@ -92,9 +92,9 @@ def main():
             continue
         decompiledText = result.getDecompiledFunction().getC()
         
-        properName = getSignatureFromNWarrning(decompiledText)
+        properName = getSignatureFromNAssert(decompiledText)
         if properName is None:
-            properName = getSignatureFromNAssert(decompiledText)
+            properName = getSignatureFromNWarrning(decompiledText)
         
         if properName:
             try:
