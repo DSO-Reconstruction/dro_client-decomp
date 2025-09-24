@@ -7,6 +7,7 @@
 import re
 from ghidra.app.decompiler import DecompInterface
 from ghidra.program.model.symbol import SourceType
+from time import time
 
 def ensureTypesDefined(sigStr):
     """
@@ -43,8 +44,9 @@ def replace_in_brackets(text, old="::", new ="_" ):
         return text               
                 
 def getSignatureFromNAssert(decompiledText):
-    reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^":]+\s([\w:]*(?:<[\s\w:,<>]*>)?[\w:]*(?:\s\[\])?)\s*\([^"]*\))(?:\s\w*)?"' # function name
-    #reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^"]+\([^"]*\))"' # full signature
+    reguex = r'n_assert\s*\(\s*"[^"]+"\s*,(?:\s*"[^"]+"\s*,){1,2}\s*[^,]+,\s*"([^"]*\s+([\w:]*(?:<[\s\w:,<>]*>)?[\w:]*(?:\s\[\])?\s*(?:operator .|operator ..)?)\([^"]*\))(?:\s\w*)?"' # v3
+    #reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^":]+\s([\w:]*(?:<[\s\w:,<>]*>)?[\w:]*(?:\s\[\])?)\s*\([^"]*\))(?:\s\w*)?"' # v2
+    #reguex = r'n_assert\s*\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*[^,]+,\s*"([^"]+\([^"]*\))"' # v1
 
     pattern = re.compile(reguex, re.DOTALL)
     
@@ -84,7 +86,7 @@ def main():
             continue
 
         # max. 60 seconds for decomp
-        result = decompInterface.decompileFunction(function, 60, monitor)
+        result = decompInterface.decompileFunction(function, 20, monitor)
         if not result.decompileCompleted():
             print("Decompilation failed for function: " + origName)
             continue
@@ -104,4 +106,6 @@ def main():
     print("Renamed {} functions.".format(renamed_count))
 
 if __name__ == "__main__":
+    start_time = time()
     main()
+    print("n_assert_namer run for {:.2f} seconds".format(time() - start_time))
